@@ -185,6 +185,8 @@ vietnamese-traffic-sign-detection/
 | [**Xem source code**](https://github.com/Julia-Yen/traffic-sign-detection) | [**Xem quá trình train & đánh giá**](https://colab.research.google.com/drive/1ultzlCs4QgQMpII-2oLdb4HRGUJLHm7R?usp=sharing) |
 | `app.py` · `best.pt` · `requirements.txt` | Data splitting · K-Fold · Fine-tuning · Evaluation |
 
+🚀 Hướng dẫn sử dụng Demo
+(https://huggingface.co/spaces/Khoa109/vietnamese-traffic-sign-detection).
 </div>
 
 ---
