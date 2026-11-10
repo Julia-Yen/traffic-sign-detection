@@ -182,7 +182,7 @@ vietnamese-traffic-sign-detection/
 
 | 📦 **GitHub Repository** | ☁️ **Google Colab Notebook** |
 |:---:|:---:|
-| [**Xem source code**](https://github.com/Khoa109dn/vietnamese-traffic-sign-detection) | [**Xem quá trình train & đánh giá**](https://colab.research.google.com/drive/1ultzlCs4QgQMpII-2oLdb4HRGUJLHm7R?usp=sharing) |
+| [**Xem source code**](https://github.com/Julia-Yen/traffic-sign-detection) | [**Xem quá trình train & đánh giá**](https://colab.research.google.com/drive/1ultzlCs4QgQMpII-2oLdb4HRGUJLHm7R?usp=sharing) |
 | `app.py` · `best.pt` · `requirements.txt` | Data splitting · K-Fold · Fine-tuning · Evaluation |
 
 </div>
