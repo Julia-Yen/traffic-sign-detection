@@ -14,13 +14,8 @@
 </p>
 
 <p>
-  <a href="https://github.com/Khoa109dn/vietnamese-traffic-sign-detection">
-    <img alt="GitHub Repository" src="https://img.shields.io/badge/Source_Code-GitHub-181717?style=flat-square&logo=github&logoColor=white" />
-  </a>
-
-  <a href="https://colab.research.google.com/drive/1ultzlCs4QgQMpII-2oLdb4HRGUJLHm7R?usp=sharing">
-    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" />
-  </a>
+  <a href="https://github.com/Khoa109dn/vietnamese-traffic-sign-detection"><img alt="GitHub" src="https://img.shields.io/badge/Source_Code-GitHub-181717?style=flat-square&logo=github&logoColor=white" /></a>
+  <a href="https://colab.research.google.com/drive/1ultzlCs4QgQMpII-2oLdb4HRGUJLHm7R?usp=sharing"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
 </p>
 
 *Phát hiện vị trí · Phân loại biển báo · Phân đoạn đối tượng · Nhận diện biển chỉ dẫn*
@@ -31,49 +26,27 @@
 
 ## 📖 Giới thiệu
 
-Dự án xây dựng hệ thống **Traffic Sign Detection & Segmentation** dành cho biển báo giao thông Việt Nam.
+Dự án xây dựng hệ thống **Traffic Sign Detection & Segmentation** cho biển báo giao thông Việt Nam. **YOLO12m pre-trained** được fine-tune trên dữ liệu có nhãn, đánh giá bằng **5-Fold Cross-Validation** và kết hợp **Segment Anything Model (SAM)** cùng **OpenCV** để nhận diện, phân đoạn và trực quan hóa kết quả.
 
-Mô hình **YOLO12m pre-trained** được fine-tune trên bộ dữ liệu biển báo đã được gán nhãn, sau đó đánh giá bằng **5-Fold Cross-Validation** để lựa chọn checkpoint tốt nhất.
+**Các thành phần chính:**
 
-Sau quá trình huấn luyện, mô hình YOLO12m được kết hợp với **Segment Anything Model (SAM)** và **OpenCV** nhằm xây dựng pipeline hoàn chỉnh gồm:
-
-- Phát hiện biển báo.
-- Phân loại biển báo.
-- Trích xuất Bounding Box.
-- Tính Confidence Score.
-- Phân đoạn đối tượng bằng SAM.
-- Bổ sung nhận diện biển chỉ dẫn nền xanh bằng OpenCV.
-- Trực quan hóa kết quả thông qua Gradio.
-
-### Các thành phần chính
-
-- **YOLO12m:** Phát hiện Bounding Box, dự đoán class và Confidence Score.
-- **K-Fold Cross-Validation:** Đánh giá mô hình trên 5 tập Validation khác nhau.
-- **SAM:** Tạo Segmentation Mask từ các Bounding Box được YOLO/OpenCV phát hiện.
-- **OpenCV:** Hỗ trợ phát hiện biển chỉ dẫn dựa trên màu xanh dương, vùng trắng và đặc trưng hình chữ nhật.
-- **Gradio:** Xây dựng giao diện web để upload ảnh và chạy inference.
-
----
+- **YOLO12m:** Phát hiện bounding box, phân loại biển báo và dự đoán độ tin cậy.
+- **5-Fold Cross-Validation:** Đánh giá mô hình qua 5 lượt train/validation.
+- **SAM:** Tạo segmentation mask dựa trên bounding box.
+- **OpenCV:** Hỗ trợ nhận diện biển chỉ dẫn nền xanh dương, vùng trắng/sáng, dạng hình chữ nhật.
+- **Gradio:** Giao diện upload ảnh, chỉnh confidence và bật/tắt SAM/OpenCV.
 
 ## 🏆 Kết quả nổi bật
 
 <div align="center">
 
-| **98.03%** | **99.13%** | **98.71%** | **99.76%** |
+| **98.03%** | **99.13%** | **98.71%** | **20 Epochs** |
 |:---:|:---:|:---:|:---:|
-| Mean K-Fold mAP@50 | Best Fold mAP@50 | Test mAP@50 | Test Recall |
+| Mean K-Fold mAP@50 | Best Fold mAP@50 (Fold 3) | Test mAP@50 (Fine-tuned) | Tối đa mỗi fold |
 
 </div>
 
-### Mô hình cuối cùng
-
-```text
-Model: YOLO12m Fine-tuned
-Best Fold: Fold 3
-Cross-Validation mAP@50: 99.13%
-Independent Test mAP@50: 98.71%
-Checkpoint: best.pt
-```
+> Kết quả K-Fold và kết quả đánh giá trên Test là hai phép đo khác nhau. Phép so sánh với YOLO12m gốc được thực hiện theo cách đánh giá định vị biển báo, không phải so sánh phân loại đa lớp tương đương.
 
 ---
 
@@ -81,750 +54,147 @@ Checkpoint: best.pt
 
 ```mermaid
 flowchart TD
-    A[Dataset ảnh + nhãn YOLO] --> B[Ánh xạ ảnh với annotation]
-    B --> C[Giữ lại 10% Test độc lập]
-    C --> D[90% dữ liệu phát triển]
-    D --> E[5-Fold Cross-Validation]
-    E --> F[YOLO12m Fine-tuning]
-    F --> G[Data Augmentation]
-    G --> H[Early Stopping]
-    H --> I[Đánh giá từng Fold]
-    I --> J[Precision / Recall / F1 / Accuracy / mAP50]
-    J --> K[Chọn Fold 3]
-    K --> L[Export best.pt]
-    L --> M[Đánh giá trên Test độc lập]
-    M --> N[YOLO Detection]
-    N --> O[OpenCV Blue Sign Detection]
-    O --> P[SAM Segmentation]
-    P --> Q[Visualization]
-    Q --> R[Gradio Web Demo]
+    A[Ảnh và nhãn YOLO] --> B[90% phát triển / 10% Test]
+    B --> C[5-Fold Cross-Validation]
+    C --> D[Fine-tune YOLO12m + Augmentation]
+    D --> E[Đánh giá và chọn Fold 3]
+    E --> F[Export best.pt]
+    F --> G[So sánh với YOLO12m gốc trên Test]
+    G --> H[YOLO Detection + OpenCV]
+    H --> I[SAM Segmentation]
+    I --> J[Gradio Demo]
 ```
 
----
+### 1. Chuẩn bị dữ liệu & K-Fold Cross-Validation
 
-## 1. 📂 Chuẩn bị dữ liệu
+1. Khởi tạo mô hình từ trọng số **`yolo12m.pt`**; ánh xạ ảnh với annotation theo định dạng YOLO.
+2. Giữ **10% dữ liệu làm Test**; sử dụng **90% còn lại cho 5-Fold Cross-Validation**.
+3. Mỗi lượt dùng **4 fold để Train** và **1 fold để Validation**, lần lượt từ Fold 0 đến Fold 4.
+4. Lưu YAML, metric và checkpoint của từng fold; chọn checkpoint có **mAP@50 cao nhất**.
 
-Dữ liệu bao gồm:
+### 2. Fine-tuning & Data Augmentation
 
-```text
-Dataset/
-├── images/
-├── labels/
-└── split_dataset/
-    ├── train_files.txt
-    └── test_files.txt
-```
-
-Mỗi ảnh được ánh xạ với file annotation tương ứng theo định dạng YOLO:
-
-```text
-<class_id> <center_x> <center_y> <width> <height>
-```
-
-Các tọa độ Bounding Box được chuẩn hóa trong khoảng:
-
-```text
-0.0 → 1.0
-```
-
-### Data Split
-
-Bộ dữ liệu được chia thành:
-
-- **90% dữ liệu:** sử dụng cho Training + Validation.
-- **10% dữ liệu:** giữ lại làm **Independent Test Set**.
-
-Tập Test không tham gia vào quá trình lựa chọn mô hình.
-
----
-
-## 2. 🔄 5-Fold Cross-Validation
-
-90% dữ liệu phát triển được chia thành:
-
-```text
-Fold 0
-Fold 1
-Fold 2
-Fold 3
-Fold 4
-```
-
-Trong mỗi lần huấn luyện:
-
-```text
-4 Folds → Training
-1 Fold  → Validation
-```
-
-Quá trình được lặp lại 5 lần để mỗi fold đều được sử dụng làm Validation đúng một lần.
-
-Ví dụ:
-
-```text
-Run 1:
-Train → Fold 1 + 2 + 3 + 4
-Val   → Fold 0
-
-Run 2:
-Train → Fold 0 + 2 + 3 + 4
-Val   → Fold 1
-
-...
-
-Run 5:
-Train → Fold 0 + 1 + 2 + 3
-Val   → Fold 4
-```
-
----
-
-## 3. 🧠 YOLO12m Fine-tuning
-
-Mô hình được khởi tạo bằng trọng số:
-
-```text
-yolo12m.pt
-```
-
-Sau đó fine-tune trên dữ liệu biển báo giao thông Việt Nam.
-
-### Training Configuration
-
-```python
-results = model.train(
-    data=yaml_path,
-    epochs=20,
-    imgsz=640,
-    batch=8,
-    patience=5,
-    project="Traffic_Sign_KFold",
-    name=f"run_fold_{fold}",
-
-    hsv_h=0.015,
-    hsv_s=0.7,
-    hsv_v=0.4,
-
-    degrees=15.0,
-    translate=0.1,
-    scale=0.5,
-    shear=2.0,
-
-    mosaic=1.0,
-    mixup=0.1,
-
-    fliplr=0.0,
-    flipud=0.0
-)
-```
-
----
-
-## 4. 🎨 Data Augmentation
-
-Các kỹ thuật Data Augmentation được sử dụng nhằm tăng khả năng tổng quát hóa của mô hình.
+Cấu hình: **20 epochs tối đa/fold**, **640 × 640**, **batch = 8** và **Early Stopping (`patience = 5`)**.
 
 | Kỹ thuật | Thiết lập | Mục đích |
 |:---|:---:|:---|
-| 🌈 **HSV Augmentation** | H `0.015`, S `0.7`, V `0.4` | Thay đổi màu sắc, độ bão hòa và ánh sáng |
-| 🔄 **Rotation** | `±15°` | Mô phỏng ảnh chụp bị nghiêng |
-| ↔️ **Translation** | `0.1` | Dịch chuyển vị trí biển báo |
-| 🔍 **Scaling** | `0.5` | Thay đổi kích thước đối tượng |
-| 📐 **Shearing** | `±2°` | Mô phỏng biến dạng phối cảnh |
-| 🧩 **Mosaic** | `1.0` | Ghép nhiều ảnh thành một sample |
-| 🫧 **MixUp** | `0.1` | Trộn hai ảnh training |
-| 🚫 **Horizontal Flip** | `0.0` | Không sử dụng |
-| 🚫 **Vertical Flip** | `0.0` | Không sử dụng |
+| **HSV Augmentation** | H `0.015` · S `0.7` · V `0.4` | Thay đổi màu sắc, ánh sáng |
+| **Rotation** | `±15°` | Mô phỏng góc ảnh nghiêng |
+| **Translation** | `0.1` | Dịch chuyển vị trí |
+| **Scaling** | `0.5` | Thay đổi kích thước |
+| **Shearing** | `±2°` | Biến đổi hình học |
+| **Mosaic** | `1.0` | Kết hợp nhiều ảnh |
+| **MixUp** | `0.1` | Trộn ảnh huấn luyện |
+| **Horizontal / Vertical Flip** | `0.0 / 0.0` | Tránh đảo hướng biển báo |
 
-Không sử dụng Horizontal Flip hoặc Vertical Flip vì việc đảo hướng có thể làm thay đổi ý nghĩa của một số biển báo.
+**Early Stopping** dừng huấn luyện khi metric theo dõi không cải thiện trong 5 epochs liên tiếp.
 
----
+### 3. Đánh giá mô hình
 
-## 5. ⏹️ Early Stopping
-
-Training sử dụng:
-
-```text
-patience = 5
-```
-
-Quá trình huấn luyện sẽ dừng nếu metric theo dõi không cải thiện trong **5 epoch liên tiếp**.
-
-Điều này giúp:
-
-- Hạn chế overfitting.
-- Giảm thời gian huấn luyện không cần thiết.
-- Tiết kiệm GPU.
-- Giữ checkpoint tốt nhất.
+Sử dụng **Precision, Recall, F1-Score, mAP@50** và **Accuracy** (theo công thức riêng trong chương trình đánh giá). Kết quả được tổng hợp ở hai mục dưới đây.
 
 ---
 
-# 📊 Model Evaluation
+## 📊 YOLO12m Original vs Fine-tuned
 
-Các metric được sử dụng để đánh giá:
-
-### Precision
-
-```text
-Precision = TP / (TP + FP)
-```
-
-### Recall
-
-```text
-Recall = TP / (TP + FN)
-```
-
-### F1-Score
-
-```text
-F1 = 2 × Precision × Recall / (Precision + Recall)
-```
-
-### Detection Accuracy
-
-```text
-Accuracy = TP / (TP + FP + FN)
-```
-
-### mAP@50
-
-Mean Average Precision tại:
-
-```text
-IoU = 0.5
-```
-
----
-
-# 📈 YOLO12m Original vs Fine-tuned
-
-Để đánh giá mức cải thiện sau fine-tuning, hai mô hình được chạy trên **cùng một tập Test độc lập**.
-
-### Test Dataset
-
-```text
-Images: 639
-Ground Truth Boxes: 1645
-```
+Hai mô hình được chạy trên cùng tập **Test gồm 639 ảnh và 1.645 bounding box Ground Truth**, nhằm đánh giá mức cải thiện sau fine-tuning.
 
 <p align="center">
-  <img src="model_comparison_white.png" width="1100">
+  <img src="model_comparison_white.png" alt="YOLO12m Original vs Fine-tuned results" width="1100" />
 </p>
-
-### Kết quả
 
 | Model | Precision | Recall | F1-Score | mAP@50 | Accuracy |
 |:---|---:|---:|---:|---:|---:|
 | YOLO12m Original | 0.4762 | 0.0061 | 0.0120 | 0.2285 | 0.0060 |
 | **YOLO12m Fine-tuned** | **0.9636** | **0.9976** | **0.9803** | **0.9871** | **0.9613** |
 
-### Detection Statistics
+Mô hình Fine-tuned đạt **mAP@50 = 98.71%**, phát hiện đúng **1.641/1.645** bounding box Ground Truth tại ngưỡng đánh giá đã chọn (TP = 1.641, FP = 62, FN = 4).
 
-| Model | TP | FP | FN | GT Boxes |
-|:---|---:|---:|---:|---:|
-| YOLO12m Original | 10 | 11 | 1635 | 1645 |
-| **YOLO12m Fine-tuned** | **1641** | **62** | **4** | **1645** |
+> **Lưu ý:** YOLO12m Original sử dụng lớp COCO `stop sign`, còn mô hình Fine-tuned sử dụng các lớp biển báo đã học; bảng trên phản ánh khả năng **định vị** theo quy tắc đánh giá của notebook, không phản ánh so sánh phân loại đa lớp công bằng. Accuracy ở bảng được tính bằng `TP / (TP + FP + FN)`.
 
-### Kết quả Fine-tuned Model
+## 🔄 K-Fold Cross-Validation & Best Model
 
-```text
-Precision = 96.36%
-Recall    = 99.76%
-F1-Score  = 98.03%
-mAP@50    = 98.71%
-Accuracy  = 96.13%
-```
-
-Trong tổng số:
-
-```text
-1645 Ground Truth Boxes
-```
-
-mô hình Fine-tuned phát hiện đúng:
-
-```text
-1641 biển báo
-```
-
-và bỏ sót:
-
-```text
-4 biển báo
-```
-
-### Nhận xét
-
-Kết quả cho thấy việc fine-tuning YOLO12m trên dữ liệu biển báo giao thông Việt Nam giúp cải thiện đáng kể khả năng phát hiện.
-
-Đặc biệt:
-
-```text
-Recall:
-0.0061 → 0.9976
-
-F1-score:
-0.0120 → 0.9803
-
-mAP@50:
-0.2285 → 0.9871
-```
-
-> **Lưu ý:** YOLO12m Original chưa được huấn luyện chuyên biệt cho hệ thống class biển báo giao thông Việt Nam. Do đó, kết quả này chủ yếu thể hiện mức cải thiện sau **domain-specific fine-tuning**.
-
----
-
-# 🔄 K-Fold Cross-Validation Results
-
-Sau quá trình Fine-tuning, kết quả từ 5 Fold được tổng hợp như sau:
+Kết quả của **5 fold** được tổng hợp như sau:
 
 <p align="center">
-  <img src="kfold_results_white.png" width="900">
+  <img src="kfold_results_white.png" alt="5-Fold Cross-Validation results" width="900" />
 </p>
 
-| Fold | Precision | Recall | F1-Score | Accuracy | mAP@50 |
-|:---|---:|---:|---:|---:|---:|
-| Fold 0 | 0.9513 | 0.9413 | 0.9326 | 0.9755 | 0.9753 |
-| Fold 1 | 0.9570 | 0.9492 | 0.9411 | 0.9456 | 0.9786 |
-| Fold 2 | 0.9194 | 0.9329 | 0.9104 | 0.9910 | 0.9653 |
-| **Fold 3 🥇** | **0.9604** | **0.9807** | **0.9697** | **0.9747** | **0.9913** |
-| Fold 4 | 0.9511 | 0.9739 | 0.9598 | 0.9969 | 0.9911 |
-| **Mean** | **0.9478** | **0.9556** | **0.9427** | **0.9768** | **0.9803** |
-| Std | 0.0164 | 0.0208 | 0.0233 | 0.0200 | 0.0111 |
-
-### Mean Performance
-
-```text
-Precision = 0.9478
-Recall    = 0.9556
-F1-Score  = 0.9427
-Accuracy  = 0.9768
-mAP@50    = 0.9803
-```
-
-Tương đương:
-
-```text
-Mean mAP@50 = 98.03%
-```
+- **Mean mAP@50:** `0.9803` (**98.03%**).
+- **Best Fold:** **Fold 3** với Precision `0.9604`, Recall `0.9807`, F1-Score `0.9697` và **mAP@50 `0.9913` (99.13%)**.
+- **Checkpoint được chọn:** `Traffic_Sign_KFold/run_fold_3/weights/best.pt`, xuất thành **`best.pt`** để chạy ứng dụng.
 
 ---
 
-# 🥇 Best Model Selection — Fold 3
+## 🧠 Detection, Segmentation & OpenCV
 
-Trong 5 Fold, **Fold 3** đạt giá trị mAP@50 cao nhất:
+### 🎯 YOLO12m — Traffic Sign Detection
 
-```text
-Precision = 0.9604
-Recall    = 0.9807
-F1-Score  = 0.9697
-Accuracy  = 0.9747
-mAP@50    = 0.9913
-```
+- Nạp checkpoint **`best.pt`** để dự đoán **bounding box, class label, confidence score**.
+- Ngưỡng confidence mặc định **`0.5`**, có thể thay đổi trong giao diện.
 
-### Best mAP@50
+### 🖌️ SAM — Instance Segmentation
 
-```text
-99.13%
-```
+- Sử dụng **`sam_b.pt`** và các bounding box làm box prompts.
+- Tạo **segmentation mask**, phủ màu bán trong suốt và vẽ contour bằng OpenCV.
 
-Do đó Fold 3 được lựa chọn làm checkpoint cuối cùng.
+### 🟦 OpenCV — Blue Directional Sign Recognition
 
-```text
-/content/runs/detect/Traffic_Sign_KFold/run_fold_3/weights/best.pt
-```
+1. Chuyển ảnh sang **HSV** để lọc vùng nền xanh dương.
+2. Áp dụng **morphological operations** và **contour detection** để tìm vùng ứng viên hình chữ nhật.
+3. Kiểm tra tỷ lệ màu xanh, vùng trắng/sáng và các ràng buộc hình dạng.
+4. Đối chiếu với box YOLO qua **IoU/độ phủ**, bổ sung biển bỏ sót hoặc gán nhãn **“Biển chỉ dẫn”**.
 
-Sau khi export:
+> Phần OpenCV là phương pháp dựa trên quy tắc, không phải confidence từ YOLO; kết quả có thể có false positive.
 
-```text
-best.pt
-```
+### 🖼️ Visualization
 
-được sử dụng trong ứng dụng inference.
-
-### Final Model Pipeline
-
-```text
-YOLO12m Pre-trained
-        │
-        ▼
-Fine-tuning
-        │
-        ▼
-5-Fold Cross-Validation
-        │
-        ▼
-Fold 3 — mAP@50 = 99.13%
-        │
-        ▼
-best.pt
-        │
-        ▼
-Independent Test
-        │
-        ▼
-mAP@50 = 98.71%
-        │
-        ▼
-YOLO + OpenCV + SAM
-        │
-        ▼
-Gradio Web Application
-```
+Hiển thị **bounding box được đánh số, segmentation mask, ảnh crop, tên biển báo**, độ tin cậy YOLO hoặc nguồn phát hiện (YOLO/OpenCV).
 
 ---
 
-# 🧠 Detection, Segmentation & OpenCV
+## 🧪 Giao diện demo (Gradio)
 
-## 🎯 YOLO12m — Traffic Sign Detection
+File **`app.py`** cho phép:
 
-Checkpoint:
+- Upload ảnh giao thông từ máy tính.
+- Điều chỉnh confidence từ **`0.1` đến `0.9`** (mặc định `0.5`).
+- Bật/tắt **SAM Segmentation** và **OpenCV biển xanh**.
+- Xem ảnh kết quả và tổng số biển báo nhận diện.
 
-```text
-best.pt
-```
+**🌐 [Truy cập Hugging Face Demo](https://huggingface.co/spaces/Khoa109/vietnamese-traffic-sign-detection)**
 
-YOLO12m chịu trách nhiệm:
-
-- Phát hiện vị trí biển báo.
-- Sinh Bounding Box.
-- Phân loại biển báo.
-- Tính Confidence Score.
-
-Ngưỡng Confidence mặc định:
-
-```text
-0.5
-```
-
-Người dùng có thể điều chỉnh ngưỡng này trong giao diện Gradio.
-
----
-
-## 🖌️ SAM — Instance Segmentation
-
-Sau khi YOLO/OpenCV tìm được vị trí biển báo, Bounding Box được truyền vào **Segment Anything Model**.
-
-Checkpoint:
-
-```text
-sam_b.pt
-```
-
-Pipeline:
-
-```text
-Bounding Box
-      │
-      ▼
-SAM Box Prompt
-      │
-      ▼
-Segmentation Mask
-      │
-      ▼
-Contour Extraction
-```
-
-OpenCV được sử dụng để lấy đường viền:
-
-```python
-cv2.findContours()
-```
-
-và trực quan hóa:
-
-```python
-cv2.drawContours()
-```
-
-Segmentation Mask được phủ màu bán trong suốt lên ảnh gốc.
-
----
-
-# 🟦 OpenCV — Blue Directional Sign Detection
-
-Một số biển chỉ dẫn nền xanh có thể chưa được YOLO nhận diện tốt.
-
-Do đó hệ thống bổ sung một pipeline OpenCV dựa trên đặc trưng hình ảnh.
-
-## Các bước xử lý
-
-### 1. RGB → HSV
-
-```python
-hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-```
-
-HSV giúp tách màu xanh ổn định hơn RGB.
-
-### 2. Blue Mask
-
-Sử dụng:
-
-```python
-cv2.inRange()
-```
-
-để xác định các vùng màu xanh.
-
-### 3. Morphological Processing
-
-Áp dụng:
-
-```python
-cv2.morphologyEx()
-```
-
-nhằm:
-
-- Nối vùng màu xanh bị đứt.
-- Loại bỏ khoảng trống nhỏ.
-- Ổn định Contour.
-
-### 4. Contour Detection
-
-```python
-cv2.findContours()
-```
-
-được sử dụng để tìm vùng ứng viên.
-
-### 5. Shape Filtering
-
-Các vùng ứng viên được lọc dựa trên:
-
-```text
-Width
-Height
-Area
-Aspect Ratio
-Rectangularity
-```
-
-Mục tiêu là tìm:
-
-```text
-Blue + Rectangle
-```
-
-### 6. Color Ratio
-
-Kiểm tra tỷ lệ Pixel xanh nằm trong Bounding Box.
-
-Ngoài ra kiểm tra:
-
-- Vùng sáng.
-- Vùng trắng.
-- Đặc trưng chữ/ký hiệu trên biển.
-
-### 7. YOLO/OpenCV Fusion
-
-Nếu OpenCV tìm được biển xanh trùng với YOLO:
-
-```text
-YOLO Box
-   +
-OpenCV Box
-   ↓
-IoU / Coverage
-```
-
-Box được cập nhật thành:
-
-```text
-Biển chỉ dẫn
-```
-
-Nếu YOLO bỏ sót hoàn toàn:
-
-```text
-OpenCV Candidate
-        ↓
-Add new detection
-        ↓
-Biển chỉ dẫn
-```
-
-> OpenCV sử dụng heuristic dựa trên màu sắc và hình dạng, do đó không phải Confidence Score từ Deep Learning Model.
-
----
-
-# 🖼️ Visualization
-
-Kết quả cuối cùng bao gồm:
-
-- Bounding Box.
-- Số thứ tự biển báo.
-- Segmentation Mask.
-- Contour.
-- Crop ảnh biển báo.
-- Class name.
-- Confidence Score.
-- Nguồn Detection.
-
-Ví dụ nguồn nhận diện:
-
-```text
-YOLO
-YOLO + OpenCV
-OpenCV
-```
-
----
-
-# 🧪 Giao diện Demo — Gradio
-
-Ứng dụng được triển khai thông qua:
-
-```text
-Gradio
-+
-Hugging Face Spaces
-+
-ZeroGPU
-```
-
-File:
-
-```text
-app.py
-```
-
-cung cấp giao diện cho phép người dùng:
-
-- Upload ảnh giao thông.
-- Điều chỉnh Confidence Threshold.
-- Bật/Tắt SAM Segmentation.
-- Bật/Tắt OpenCV Blue Sign Detection.
-- Xem ảnh Detection + Segmentation.
-- Xem số lượng biển báo được phát hiện.
-
-### Confidence Slider
-
-```text
-Minimum: 0.1
-Maximum: 0.9
-Default: 0.5
-```
-
-### SAM
-
-```text
-☑ Bật SAM Segmentation
-```
-
-### OpenCV
-
-```text
-☑ Bật OpenCV biển xanh
-```
-
----
-
-# 🚀 Demo
-
-<div align="center">
-
-### Hugging Face Spaces
-
-[**🚦 Open Traffic Sign Detection Demo**](https://huggingface.co/spaces/Khoa109/vietnamese-traffic-sign-detection)
-
-</div>
-
----
-
-# 📂 Repository Structure
+## 📂 Cấu trúc repository
 
 ```text
 vietnamese-traffic-sign-detection/
-│
-├── app.py
-│   └── Gradio + YOLO12m + SAM + OpenCV
-│
-├── best.pt
-│   └── Fine-tuned YOLO12m — Fold 3
-│
-├── requirements.txt
-│   └── Python dependencies
-│
-├── model_comparison_white.png
-│   └── Original vs Fine-tuned comparison
-│
-├── kfold_results_white.png
-│   └── 5-Fold Cross-Validation results
-│
-└── README.md
+├── app.py                       # Gradio + YOLO12m + SAM + OpenCV
+├── best.pt                      # Fine-tuned checkpoint (Fold 3)
+├── requirements.txt             # Python dependencies
+├── model_comparison_white.png   # Bảng so sánh hai mô hình
+├── kfold_results_white.png      # Bảng 5-Fold Cross-Validation
+└── README.md                    # Tài liệu dự án
 ```
 
----
-
-# 🔗 Source Code & Training Notebook
+## 🔗 Source Code & Training Notebook
 
 <div align="center">
 
 | 📦 **GitHub Repository** | ☁️ **Google Colab Notebook** |
 |:---:|:---:|
-| [**Xem Source Code**](https://github.com/Khoa109dn/vietnamese-traffic-sign-detection) | [**Xem Training Notebook**](https://colab.research.google.com/drive/1ultzlCs4QgQMpII-2oLdb4HRGUJLHm7R?usp=sharing) |
-| `app.py` · `best.pt` · `requirements.txt` | Data Split · K-Fold · Fine-tuning · Evaluation |
+| [**Xem source code**](https://github.com/Khoa109dn/vietnamese-traffic-sign-detection) | [**Xem quá trình train & đánh giá**](https://colab.research.google.com/drive/1ultzlCs4QgQMpII-2oLdb4HRGUJLHm7R?usp=sharing) |
+| `app.py` · `best.pt` · `requirements.txt` | Data splitting · K-Fold · Fine-tuning · Evaluation |
+
+**[🚀 Mở Demo](https://huggingface.co/spaces/Khoa109/vietnamese-traffic-sign-detection)**
 
 </div>
 
 ---
 
-# 🛠️ Technologies
-
 <div align="center">
-
-**Python · PyTorch · Ultralytics · YOLO12m · SAM · OpenCV · NumPy · PIL · Gradio**
-
-</div>
-
----
-
-# 📌 Model Summary
-
-```text
-Base Model
-└── YOLO12m
-
-Fine-tuning
-├── Image Size: 640 × 640
-├── Epochs: 20
-├── Batch Size: 8
-├── Data Augmentation
-└── Early Stopping: patience = 5
-
-Validation
-└── 5-Fold Cross-Validation
-    └── Best Fold: Fold 3
-        └── mAP@50 = 99.13%
-
-Independent Test
-├── Images: 639
-├── Ground Truth: 1645
-├── Precision: 96.36%
-├── Recall: 99.76%
-├── F1-score: 98.03%
-├── mAP@50: 98.71%
-└── Accuracy: 96.13%
-
-Inference
-├── YOLO12m Detection
-├── OpenCV Blue Sign Detection
-├── SAM Segmentation
-└── Gradio Visualization
-```
-
----
-
-<div align="center">
-
-## 🚦 Vietnamese Traffic Sign Detection & Segmentation
 
 **Built with YOLO12m · SAM · OpenCV · Gradio**
 
-*Computer Vision for Vietnamese Traffic Sign Recognition*
+*Vietnamese Traffic Sign Detection & Segmentation*
 
 </div>
