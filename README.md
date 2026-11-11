@@ -186,6 +186,7 @@ vietnamese-traffic-sign-detection/
 | `app.py` · `best.pt` · `requirements.txt` | Data splitting · K-Fold · Fine-tuning · Evaluation |
 
 **[🚀 Mở Demo](https://huggingface.co/spaces/Khoa109/vietnamese-traffic-sign-detection)**
+So sánh https://colab.research.google.com/drive/1o7gwXKkIZLyydr-bj-k7T1MEvzgigfLu?hl=vi
 
 </div>
 
